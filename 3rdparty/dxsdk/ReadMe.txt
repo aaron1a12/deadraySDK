@@ -1,0 +1,1 @@
+Place the Microsoft DirectX SDK (June 2010) folders (Include, Lib, Redist) here.
