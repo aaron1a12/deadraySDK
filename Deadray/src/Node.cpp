@@ -6,7 +6,12 @@
 
 using namespace Deadray;
 
-//bool result = Engine::RegisterNewType("Node");
+const bool Node::bRegistered = Engine::RegisterNewType(1000, "BaseNode"); //RegisterType();
+
+NodeType Node::GetNodeType()
+{
+	return 1000;
+}
 
 /*
 

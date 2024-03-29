@@ -2,6 +2,7 @@
 #define   DEADRAY_ENGINE_H
 
 #include "Deadray/Core.h"
+#include "Deadray/DMap.h"
 #include <vector>
 #include <deque>
 #include <string>
@@ -17,7 +18,10 @@ namespace Deadray {
 	class DEADRAY_API Engine {
 
 	private:
-		//static DMap<const char*, uint32> nodeTypes;
+
+		// Mapping of Node type IDs to their names
+		static DMap<uint32, const char*> nodeNames;
+		//static int foo;
 
 		//boost::unordered::unordered_map<std::string, uint32> foo;
 
@@ -207,31 +211,9 @@ namespace Deadray {
 
 		void DrawTextString(int x, int y, DWORD color, const char * str);
 
-		/// EVENTS
 
-		/*std::deque<EventHandlerItem> evtHandlerItems;
-		void AddEventHandler(EventHandler handler, void* owner);
-
-		template <typename T>
-		void BindEvent(void (__thiscall T::* )(LPCWSTR))
-		{
-		}
-
-		void BindEventHandler(void (__thiscall CEvtHandler::* )(LPCWSTR))
-		{
-		}
-
-		void BroadcastEvent(EvtMsg evtMsg);*/
-
-
-		/*template <typename T>
-		void BroadcastEvent(T)
-		{
-		}*/
-
-		static bool RegisterNewType(const char* );
-
-
+		static bool RegisterNewType(uint32 type, const char* name);
+		static const char* GetNodeTypeName(uint32 type);
 
 	};
 

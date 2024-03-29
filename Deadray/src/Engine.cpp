@@ -1048,3 +1048,33 @@ void Engine::BroadcastEvent(EvtMsg evtMsg)
 		evtHandlerItems[i].eventHandler(evtMsg);
 	}
 }*/
+
+DMap<uint32, const char*> Engine::nodeNames;
+
+bool Engine::RegisterNewType(uint32 type, const char* name)
+{
+	nodeNames.Insert(type, name);
+
+	//char* str = new char[16];
+	//sprintf(str, "\nRegistering type %d: %s", type, name);
+
+	//OutputDebugStringA(str);
+
+	//delete str;
+
+	return true;
+}
+
+const char* Engine::GetNodeTypeName(uint32 type)
+{
+	const char** name = nodeNames.Find(type);
+
+	if (name)
+	{
+		return *name;
+	}
+	else
+	{
+		return "Unknown node";
+	}
+}

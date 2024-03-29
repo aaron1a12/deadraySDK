@@ -126,26 +126,27 @@ void CSceneView::OnSize(UINT nType, int cx, int cy)
 
 void CSceneView::OnSceneUpdate(const Deadray::EventSceneUpdate& sceneUpdate)
 {
-	//this->engine->log("New node. Type: %u", sceneUpdate.newNode->GetNodeType());
+	//LPCSTR nodeType = (LPCSTR)Deadray::Engine::GetNodeTypeName(sceneUpdate.newNode->GetNodeType());
 
-	LPCTSTR name;
 
-	switch(sceneUpdate.newNode->GetNodeType()) {
-		case Deadray::Types::Node:
-			name = _T("Node");
-		break;
-		case Deadray::Types::MeshNode:
-			name = _T("MeshNode");
-		break;
-		case Deadray::Types::SceneNode:
-			name = _T("SceneNode");
-		break;
-		default:
-			name = _T("Unknown node type");
-	}
+	char* str = new char[100];
+	sprintf(str, "%s (%u)", Deadray::Engine::GetNodeTypeName(sceneUpdate.newNode->GetNodeType()), sceneUpdate.newNode->GetNodeType());
 
-	HTREEITEM hRoot = m_wndSceneView.InsertItem(name, 0, 0);
+
+
+	// convert to wide string
+	size_t newsize = strlen(str) + 1;
+	wchar_t * wcstring = new wchar_t[newsize];
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, str, _TRUNCATE);
+
+
+	
+	HTREEITEM hRoot = m_wndSceneView.InsertItem(wcstring, 0, 0);
 	m_wndSceneView.SetItemState(hRoot, TVIS_BOLD, TVIS_BOLD);
+
+	delete wcstring;
+	delete str;
 }
 
 void CSceneView::FillSceneView()

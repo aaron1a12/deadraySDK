@@ -20,9 +20,9 @@ namespace Deadray {
 		MeshNode(Node* parent, void* params = nullptr);
 		~MeshNode();
 
-		virtual NodeType GetNodeType() override {
-			return Types::MeshNode;
-		}
+	public:
+		static const bool bRegistered;
+		virtual NodeType GetNodeType() override;
 	};
 
 }

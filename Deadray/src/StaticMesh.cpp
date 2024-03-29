@@ -14,3 +14,11 @@ StaticMesh::StaticMesh(Node* parent) : SceneNode(parent)
 	mesh = CreateChildNode<MeshNode>();
 	//mesh->SetMesh(L"data\\warlock.obj");
 }
+
+// Node type registration
+
+const bool StaticMesh::bRegistered = Engine::RegisterNewType(1003, "StaticMesh");
+NodeType StaticMesh::GetNodeType()
+{
+	return 1003;
+}

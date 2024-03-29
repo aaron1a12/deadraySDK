@@ -39,9 +39,7 @@ namespace Deadray {
 		Engine* GetEngine();
 		Scene* GetScene();
 
-		inline virtual NodeType GetNodeType() {
-			return Types::Node;
-		}
+		virtual NodeType GetNodeType();
 
 		inline virtual const char* GetNodeClassName() {
 			return "Node";
@@ -85,11 +83,8 @@ namespace Deadray {
 
 		//void onEvent();
 
-		/*static inline const bool RegisterType() {
-			return true;
-		}
-
-		static const bool bRegistered = RegisterType();*/
+	private:
+		static const bool bRegistered;
 
 	public:
 		//virtual void OnGameStart();
@@ -97,7 +92,7 @@ namespace Deadray {
 		virtual void OnTick(float dt);
 
 	};
-
 }
+
 
 #endif

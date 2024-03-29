@@ -27,6 +27,8 @@ private:
 	char* GetStrVal(int key,  bool& bShouldFree)
 	{
 		bShouldFree = true;
+
+		// TODO: There is currently no management of this memory
 		char* str = new char[16];
 		sprintf(str, "%d", key);
 
@@ -85,7 +87,9 @@ public:
 
 		if (bShouldFree)
 		{
-			delete[] strVal;
+			// Push back is only saving a pointer
+			// Deleting here would cause the pointer to then point nowhere
+			// delete[] strVal;
 		}
 	}
 

@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/include/&quot;;&quot;$(SolutionDir)3rdparty\DirectX\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/include/&quot;;&quot;$(SolutionDir)3rdparty\dxsdk\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;DEADRAY_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -316,7 +316,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\include\Deadray\DMap.hpp"
+					RelativePath=".\include\Deadray\DMap.h"
 					>
 				</File>
 				<File
