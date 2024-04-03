@@ -50,19 +50,19 @@ void Scene::Destroy()
 }*/
 
 
-uint32 Scene::RegisterPrimitive(Primitive* newPrimitive)
+uint32 Scene::RegisterMeshNode(MeshNode* newMesh)
 {
-	inst->log("RegisterPrimitive");
+	inst->log("RegisterMeshNode");
 
-	primitives.push_back(newPrimitive);
+	meshNodes.push_back(newMesh);
 
 	// Return primitive id (index in vector)
-	return primitives.size() - 1;
+	return meshNodes.size() - 1;
 }
 
-std::vector<Primitive*>& Scene::GetPrimitiveList()
+std::vector<MeshNode*>& Scene::GetMeshNodeList()
 {
-	return primitives;
+	return meshNodes;
 }
 
 
@@ -86,6 +86,19 @@ uint32 Scene::RegisterAsTickable(Node* node)
 	EvtSceneUpdate.Broadcast();
 
 	return id;
+}
+
+Node* Scene::CreateNodeByType(uint32 type, Node* parent)
+{
+	if (parent==nullptr)
+		parent = this;
+
+	Node* n = TypeManager.CreateNewObjectByType(type, parent);
+
+	if (n->bIsTickable)
+		RegisterAsTickable(n);
+
+	return n;
 }
 
 

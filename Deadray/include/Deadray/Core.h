@@ -74,6 +74,7 @@ typedef struct IDirect3DTexture9 *LPDIRECT3DTEXTURE9, *PDIRECT3DTEXTURE9;
 //#include "Deadray/DMap.hpp"
 #include "Deadray/Test.h"
 #include "Deadray/Types.h"
+#include "Deadray/TypeManager.h"
 #include "Deadray/Event.h"
 #include "Deadray/Vector.h"
 #include "Deadray/Node.h"

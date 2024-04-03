@@ -1,20 +1,13 @@
 #include "Main.h"
 #include "Deadray.h"
+#include "Entities/PlayerPuppet.h"
 
 using namespace Deadray;
 
 class Game : public Node {
 public:
-	Game(Engine* engine) : Node(engine) 
-	{
-		Scene* myScene = new Scene(engine);
-		engine->SwitchScene( myScene );
+	PlayerPuppet* player;
 
-	}
-
-	~Game()
-	{
-		GetEngine()->log("Shutting down game...");
-		GetEngine()->log("Shutting down game...");
-	}
+	Game(Engine* engine);
+	~Game();
 };

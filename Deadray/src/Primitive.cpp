@@ -9,6 +9,8 @@
 
 using namespace Deadray;
 
+REGISTER_NODE_TYPE(Types::Primitive, Primitive);
+
 Primitive::Primitive(Node* parent, void* extra) : SceneNode(parent)
 {
 	bIsTickable = true;

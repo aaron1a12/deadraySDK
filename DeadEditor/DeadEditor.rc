@@ -223,6 +223,7 @@ BEGIN
             END
         END
     END
+    MENUITEM "&Create",                     0
     POPUP "&Help"
     BEGIN
         MENUITEM "&About DeadEditor...",        ID_APP_ABOUT

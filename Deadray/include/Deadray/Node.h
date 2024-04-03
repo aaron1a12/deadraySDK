@@ -5,10 +5,6 @@
 #include "Deadray/Types.h"
 #include <vector>
 
-//#define CreateChildNode(T, P) _CreateChildNode<T>(&T##Params(P))
-
-
-
 namespace Deadray {
 
 	class Engine;
@@ -17,19 +13,27 @@ namespace Deadray {
 
 	class DEADRAY_API Node {
 
-	private:// private
+	private:
 		
 		Engine* pEngine;
 		Node* pParentNode;
 		std::vector<Node*> childNodes;
-		std::vector<uint16> typeFamily;
-		
+		std::vector<uint16> typeFamily;	
 
 	public:
 		//typedef Node Super;
 		Node(Engine* engine, void* params = nullptr);
 		Node(Node* parent, void* params = nullptr);
 		~Node();
+
+		// Used for dynamic creation from the factory
+		template <typename T>
+		static void* CreateObject(Node* parent) {
+			return new T(parent);
+		}
+
+		// Must be overriden on every child class
+		virtual uint32 GetNodeType();
 
 		virtual void OnDeviceStart();
 		virtual void OnDeviceShutdown();
@@ -38,13 +42,6 @@ namespace Deadray {
 
 		Engine* GetEngine();
 		Scene* GetScene();
-
-		virtual NodeType GetNodeType();
-
-		inline virtual const char* GetNodeClassName() {
-			return "Node";
-		}
-
 
 		// Attaches an existing node to this one
 		void AttachNode(Node* childNode);
@@ -61,7 +58,6 @@ namespace Deadray {
 
 			AttachNode((Node*)ptr);
 			RegisterSceneNode((Node*)ptr);
-
 
 			return ptr;
 		}
@@ -83,15 +79,14 @@ namespace Deadray {
 
 		//void onEvent();
 
-	private:
-		static const bool bRegistered;
-
 	public:
 		//virtual void OnGameStart();
 
 		virtual void OnTick(float dt);
 
 	};
+
+	//REGISTER_NODE_TYPE(Types::Node, Node);
 }
 
 

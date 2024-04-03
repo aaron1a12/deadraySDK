@@ -18,11 +18,8 @@ namespace Deadray {
 		StaticMesh(Node* parent);
 		~StaticMesh();
 
-	public:
-		static const bool bRegistered;
-		virtual NodeType GetNodeType() override;
+		virtual uint32 GetNodeType() override {return Types::StaticMesh;}
 	};
-
 }
 
 #endif

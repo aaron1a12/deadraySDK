@@ -18,7 +18,7 @@ void debugPrintf(const char * _Format, ...)
 	vsnprintf_s(buffer+1, 254, 254, _Format, args);
 	va_end (args);
 
-	//OutputDebugStringA(buffer);
+	OutputDebugStringA(buffer);
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,  LPTSTR lpCmdLine, int nCmdShow)
@@ -36,6 +36,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,  LPTSTR lpC
 
 	Deadray::Engine* engine = new Deadray::Engine(wndMgr.GetWindowHandle(), settings, &debugPrintf, 0);
 	Game* game = new Game(engine);
+
+	//engine->EnableGrid(true);
 
 	engine->SetRenderSettings(settings);
 

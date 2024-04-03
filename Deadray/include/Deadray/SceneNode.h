@@ -22,7 +22,7 @@ namespace Deadray {
 		SceneNode(Node* parent);
 		~SceneNode();
 
-		virtual NodeType GetNodeType() override {
+		virtual uint32 GetNodeType() override {
 			return Types::SceneNode;
 		}
 
@@ -37,6 +37,8 @@ namespace Deadray {
 		void UpdateMatrix();
 		D3DXMATRIXA16 GetWorldMatrix();
 	};
+
+	//REGISTER_NODE_TYPE(Types::SceneNode, SceneNode);
 
 }
 

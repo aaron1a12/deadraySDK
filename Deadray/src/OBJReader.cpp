@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Deadray/Core.h"
 #include "Deadray/OBJReader.h"
-#include "Deadray/Primitive.h"
+#include "Deadray/MeshNode.h"
 #include <deque>
 
 using namespace Deadray;

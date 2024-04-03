@@ -128,11 +128,8 @@ void CSceneView::OnSceneUpdate(const Deadray::EventSceneUpdate& sceneUpdate)
 {
 	//LPCSTR nodeType = (LPCSTR)Deadray::Engine::GetNodeTypeName(sceneUpdate.newNode->GetNodeType());
 
-
 	char* str = new char[100];
-	sprintf(str, "%s (%u)", Deadray::Engine::GetNodeTypeName(sceneUpdate.newNode->GetNodeType()), sceneUpdate.newNode->GetNodeType());
-
-
+	sprintf(str, "%s (%u)", Deadray::TypeManager.GetNodeTypeName(sceneUpdate.newNode->GetNodeType()), sceneUpdate.newNode->GetNodeType());
 
 	// convert to wide string
 	size_t newsize = strlen(str) + 1;
@@ -140,8 +137,6 @@ void CSceneView::OnSceneUpdate(const Deadray::EventSceneUpdate& sceneUpdate)
 	size_t convertedChars = 0;
 	mbstowcs_s(&convertedChars, wcstring, newsize, str, _TRUNCATE);
 
-
-	
 	HTREEITEM hRoot = m_wndSceneView.InsertItem(wcstring, 0, 0);
 	m_wndSceneView.SetItemState(hRoot, TVIS_BOLD, TVIS_BOLD);
 

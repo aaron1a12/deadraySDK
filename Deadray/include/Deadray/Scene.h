@@ -7,7 +7,7 @@
 namespace Deadray {
 	class SceneNode;
 	class Camera;
-	class Primitive;
+	class MeshNode;
 	class Event;
 
 	#define	EVENT_SCENEUPDATE	1
@@ -27,7 +27,7 @@ namespace Deadray {
 	private:
 
 		std::vector<SceneNode*> sceneSceneNodes;
-		std::vector<Primitive*> primitives;
+		std::vector<MeshNode*> meshNodes;
 		std::vector<Node*> tickableNodes;
 
 		Camera* activeCamera;
@@ -46,7 +46,7 @@ namespace Deadray {
 		void Write(Scene* buffer);
 
 
-		virtual NodeType GetNodeType() override
+		virtual uint32 GetNodeType() override
 		{
 			return Types::Scene;
 		}
@@ -56,27 +56,15 @@ namespace Deadray {
 		// For editor
 		EventSceneUpdate EvtSceneUpdate;
 
-
-		/*void SpawnSceneNode( SceneNode* actor );
-		inline uint32 GetSceneNodeCount() { return sceneSceneNodes.size(); };
-
-		template <class T>
-		T* SpawnSceneNode(void* extra = nullptr)
-		{
-			T* ptr = new T( this, extra );
-
-			SpawnSceneNode((SceneNode*)ptr);
-
-			return ptr;
-		}*/
-
-
-		std::vector<Primitive*>& GetPrimitiveList();
-		uint32 RegisterPrimitive(Primitive* newPrimitive);
+		std::vector<MeshNode*>& GetMeshNodeList();
+		uint32 RegisterMeshNode(MeshNode* newMesh);
 
 		// TODO: Find a way to make subcomponents (don't even exist) tick.
 		// TODO: Rename to AddToScene
 		uint32 RegisterAsTickable(Node* node);
+
+		// Creates a node, given its id. Alternative to template version: CreateChildNode<T>()
+		Node* CreateNodeByType(uint32 type, Node* parent = nullptr);
 
 		void Tick(float dt);
 	};

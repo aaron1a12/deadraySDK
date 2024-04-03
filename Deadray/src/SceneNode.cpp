@@ -5,6 +5,8 @@
 
 using namespace Deadray;
 
+REGISTER_NODE_TYPE(Types::SceneNode, SceneNode);
+
 SceneNode::SceneNode(Node* parent) : Node(parent)
 {
 	GetEngine()->log("Scene node created");

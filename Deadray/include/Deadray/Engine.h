@@ -11,7 +11,6 @@
 
 namespace Deadray {
 
-	class Primitive;
 	class Scene;
 	struct DebugLine;
 
@@ -20,10 +19,10 @@ namespace Deadray {
 	private:
 
 		// Mapping of Node type IDs to their names
-		static DMap<uint32, const char*> nodeNames;
+		//static DMap<uint32, const char*> nodeNames;
 		//static int foo;
 
-		//boost::unordered::unordered_map<std::string, uint32> foo;
+		//boost::unordered::unordered_map<std::string, uint32> fcharacoo;
 
 
 		RenderSettings currentRenderSettings;
@@ -86,18 +85,13 @@ namespace Deadray {
 		// Lines pending draw or release
 		std::deque<DebugLine*> debugLines;
 
-
 		uint32 width;
 		uint32 height;
 
 		Grid* grid;
 
-
-		//std::vector<Primitive*> primitives;
-
 		std::deque<Scene*> scenes;
 		Scene* activeScene;
-
 
 		ID3DXFont* g_pFont;
 
@@ -210,13 +204,7 @@ namespace Deadray {
 		LPDIRECT3DDEVICE9 GetD3dDevice();
 
 		void DrawTextString(int x, int y, DWORD color, const char * str);
-
-
-		static bool RegisterNewType(uint32 type, const char* name);
-		static const char* GetNodeTypeName(uint32 type);
-
 	};
-
 }
 
 #endif

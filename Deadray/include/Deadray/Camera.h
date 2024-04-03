@@ -12,13 +12,12 @@ namespace Deadray {
 		Camera(Node* parent, void* extra = nullptr);
 		~Camera();
 
-		virtual NodeType GetNodeType() override {
+		virtual void OnTick(float dt) override;		
+
+		virtual uint32 GetNodeType() override {
 			return Types::Camera;
 		}
-
-		virtual void OnTick(float dt) override;		
 	};
-
 }
 
 #endif

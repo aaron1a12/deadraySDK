@@ -2,8 +2,10 @@
 #include "Deadray/Core.h"
 #include "Deadray/Engine.h"
 #include "Deadray/Scene.h"
-#include "Deadray/Primitive.h"
+#include "Deadray/MeshNode.h"
 #include "Deadray/DebugDraw.h"
+
+#include "Deadray/d3d9/D3d9Data.h"
 #include <math.h> 
 #include <limits>	
 
@@ -421,25 +423,26 @@ void Engine::Render()
 			}
 
 			////////////////////
-			// Scene primitives
+			// Scene mesh nodes
 			
-			std::vector<Primitive*>& primitives = activeScene->GetPrimitiveList();
+			std::vector<MeshNode*>& meshNodes = activeScene->GetMeshNodeList();
 
-			for (int i = 0; i < primitives.size(); i++)
+			for (int i = 0; i < meshNodes.size(); i++)
 			{
-				Primitive* prim = primitives[i];
+				MeshNode* msh = meshNodes[i];
 
 
-				if (prim->bOverlay)
+				// TODO: Overlays need their own list since they need to be rendered last.
+				//if (prim->bOverlay)
+				//{
+				//	g_pd3dDevice->Clear( 0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0, 0, 0 ), 1.0f, 0 );
+				//}
+
+				if(msh->HasDiffuse())
 				{
-					g_pd3dDevice->Clear( 0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0, 0, 0 ), 1.0f, 0 );
-				}
+					g_pd3dDevice->SetTexture( 0, msh->GetD3D9Data()->g_pTexture );
 
-				if(prim->HasDiffuse())
-				{
-					g_pd3dDevice->SetTexture( 0, prim->g_pTexture );
-
-					if (prim->HasAlpha())
+					if (msh->HasAlpha())
 					{
 						g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
 						g_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
@@ -462,14 +465,12 @@ void Engine::Render()
 					g_pd3dDevice->SetTexture(0, NULL);
 				}
 
-				//DEBUG("Y:%f\n", prim->GetRotation().y);
+				g_pd3dDevice->SetTransform( D3DTS_WORLD, &msh->GetWorldMatrix() );
 
-				g_pd3dDevice->SetTransform( D3DTS_WORLD, &prim->GetWorldMatrix() );
-
-				g_pd3dDevice->SetStreamSource( 0, prim->g_pVB, 0, sizeof( PrimitiveVertex ) );
-				g_pd3dDevice->SetIndices(prim->g_pIB);
+				g_pd3dDevice->SetStreamSource( 0, msh->GetD3D9Data()->g_pVB, 0, sizeof( PrimitiveVertex ) );
+				g_pd3dDevice->SetIndices(msh->GetD3D9Data()->g_pIB);
 				g_pd3dDevice->SetFVF( D3DFVF_PRIMVERTEX );
-				g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, prim->GetVertexCount(), 0, prim->GetPolyCount());
+				g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, msh->GetVertexCount(), 0, msh->GetPolyCount());
 				
 				//g_pd3dDevice->DrawPrimitive( D3DPT_POINTLIST, 0, prim->GetVertexCount());
 				
@@ -548,7 +549,7 @@ void Engine::StartDeviceObjects()
 		log("created font!");
 	}
 
-	for (int i = 0; i < scenes.size(); i++)
+	for (uint32 i = 0; i < scenes.size(); i++)
 	{
 		scenes[i]->OnDeviceStart();
     }
@@ -1025,56 +1026,4 @@ void Engine::SetAsMultithreaded(int deadrayThreadId)
 {
 	bMultithread = true;
 	threadId = deadrayThreadId;
-}
-
-
-//std::deque<EventHandler> evtHandlers;
-
-/*void Engine::AddEventHandler(EventHandler handler, void* owner)
-{
-	EventHandlerItem item;
-	item.eventHandler = handler;
-	item.owner = owner;
-
-	evtHandlerItems.push_back(item);
-}
-
-void Engine::BroadcastEvent(EvtMsg evtMsg)
-{
-
-	for (int i = 0; i < evtHandlerItems.size(); i++)
-	{
-		evtMsg.handlerOwner = evtHandlerItems[i].owner;
-		evtHandlerItems[i].eventHandler(evtMsg);
-	}
-}*/
-
-DMap<uint32, const char*> Engine::nodeNames;
-
-bool Engine::RegisterNewType(uint32 type, const char* name)
-{
-	nodeNames.Insert(type, name);
-
-	//char* str = new char[16];
-	//sprintf(str, "\nRegistering type %d: %s", type, name);
-
-	//OutputDebugStringA(str);
-
-	//delete str;
-
-	return true;
-}
-
-const char* Engine::GetNodeTypeName(uint32 type)
-{
-	const char** name = nodeNames.Find(type);
-
-	if (name)
-	{
-		return *name;
-	}
-	else
-	{
-		return "Unknown node";
-	}
 }

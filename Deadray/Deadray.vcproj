@@ -258,10 +258,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\Primitive.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\src\Scene.cpp"
 					>
 				</File>
@@ -275,6 +271,10 @@
 				</File>
 				<File
 					RelativePath=".\src\Test.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\TypeManager.cpp"
 					>
 				</File>
 				<File
@@ -352,10 +352,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\include\Deadray\Primitive.h"
-					>
-				</File>
-				<File
 					RelativePath=".\include\Deadray\Scene.h"
 					>
 				</File>
@@ -372,6 +368,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\Deadray\TypeManager.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Deadray\Types.h"
 					>
 				</File>
@@ -379,6 +379,14 @@
 					RelativePath=".\include\Deadray\Vector.h"
 					>
 				</File>
+				<Filter
+					Name="d3d9"
+					>
+					<File
+						RelativePath=".\include\Deadray\d3d9\D3d9Data.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

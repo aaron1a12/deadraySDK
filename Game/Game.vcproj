@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)/Deadray/include&quot;;&quot;C:\Program Files\Microsoft DirectX SDK (June 2010)\Include&quot;;&quot;C:\Documents and Settings\Aaron\My Documents\Visual Studio 2008\Projects\libTest\libTest&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)/Deadray/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -117,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)/Deadray/include&quot;;&quot;C:\Program Files\Microsoft DirectX SDK (June 2010)\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)/Deadray/include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -177,6 +177,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\Game.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Main.cpp"
 				>
 			</File>
@@ -204,6 +208,14 @@
 				RelativePath=".\WindowMgr.cpp"
 				>
 			</File>
+			<Filter
+				Name="Entities"
+				>
+				<File
+					RelativePath=".\Entities\PlayerPuppet.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -216,10 +228,6 @@
 			</File>
 			<File
 				RelativePath=".\Main.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Entities\PlayerPuppet.h"
 				>
 			</File>
 			<File
@@ -238,6 +246,14 @@
 				RelativePath=".\WindowMgr.h"
 				>
 			</File>
+			<Filter
+				Name="Entities"
+				>
+				<File
+					RelativePath=".\Entities\PlayerPuppet.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

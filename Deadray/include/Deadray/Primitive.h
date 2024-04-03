@@ -58,6 +58,7 @@ namespace Deadray {
 		LPCWSTR diffusePath;
 		bool bHasDiffuse;
 		bool bHasAlpha;
+
 		void ReloadDeviceTexture();
 
 		PrimitiveMeshData meshData;
@@ -75,10 +76,6 @@ namespace Deadray {
 		virtual void OnDeviceShutdown() override;
 
 		virtual void Destroy() override;
-
-		virtual NodeType GetNodeType() override {
-			return Types::Primitive;
-		}
 
 		LPDIRECT3DVERTEXBUFFER9 g_pVB; // Buffer to hold Vertices
 		LPDIRECT3DINDEXBUFFER9 g_pIB; // Stores VB Indices
@@ -104,8 +101,16 @@ namespace Deadray {
 		//virtual bool ShouldRegisterAsTickable() override;	
 
 		virtual void OnTick(float dt) override;		
+
+
+		virtual uint32 GetNodeType() override {
+			return Types::Primitive;
+		}
+
+		static bool bClassRegistered;
 	};
 
+	//REGISTER_NODE_TYPE(Types::Primitive, Primitive);
 }
 
 #endif

@@ -85,7 +85,18 @@ void Grid::OnDeviceStart()
 	// Send to device
 
 	// Microsoft: Buffers created with D3DPOOL_DEFAULT that do not specify D3DUSAGE_WRITEONLY may suffer a severe performance penalty. 
-	inst->GetD3dDevice()->CreateVertexBuffer( bufferSize, D3DUSAGE_WRITEONLY, GRIDVERTEX_FVF, D3DPOOL_DEFAULT, &gridVertexBuffer, NULL );
+	HRESULT hr = inst->GetD3dDevice()->CreateVertexBuffer( bufferSize, D3DUSAGE_WRITEONLY, GRIDVERTEX_FVF, D3DPOOL_DEFAULT, &gridVertexBuffer, NULL );
+
+	if (SUCCEEDED(hr))
+	{
+		OutputDebugString(L"\nSUCCEEDED!\n");
+	}
+
+	if (FAILED(hr))
+	{
+		OutputDebugString(L"\nFAILED!\n");
+	}
+
 
 	VOID* pVertices;
     gridVertexBuffer->Lock(0, bufferSize, (void**)&pVertices, 0 );

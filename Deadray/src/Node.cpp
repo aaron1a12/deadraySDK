@@ -6,18 +6,12 @@
 
 using namespace Deadray;
 
-const bool Node::bRegistered = Engine::RegisterNewType(1000, "BaseNode"); //RegisterType();
+REGISTER_NODE_TYPE(Types::Node, Node);
 
-NodeType Node::GetNodeType()
+uint32 Node::GetNodeType()
 {
-	return 1000;
+	return Types::Node;
 }
-
-/*
-
-REGISTER_NODE_TYPE( TYPE_STATICMESHNODE, "StaticMesh")
-
-*/
 
 Node::Node(Engine* engine, void* extra)
 {
@@ -67,7 +61,9 @@ void Node::AttachNode(Node* childNode)
 void Node::RegisterSceneNode(Node* node)
 {
 	GetEngine()->log("Register scene node");
-	GetScene()->RegisterAsTickable(node);
+
+	if (node->bIsTickable)
+		GetScene()->RegisterAsTickable(node);
 }
 
 void Node::OnDeviceStart()

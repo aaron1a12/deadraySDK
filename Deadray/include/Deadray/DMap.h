@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 template<typename T>
 struct DMapPair {
@@ -24,13 +26,13 @@ private:
 		return (char*)key;
 	}
 
-	char* GetStrVal(int key,  bool& bShouldFree)
+	char* GetStrVal(uint32 key,  bool& bShouldFree)
 	{
 		bShouldFree = true;
 
 		// TODO: There is currently no management of this memory
 		char* str = new char[16];
-		sprintf(str, "%d", key);
+		sprintf(str, "%u", key);
 
 		return str;
 	}
@@ -52,6 +54,8 @@ public:
 
 	DMap()
 	{
+		count = 0;
+
 		// default buckets
 		Reserve(10);
 	}
@@ -72,6 +76,11 @@ public:
 		}
 	}
 
+	unsigned int Size()
+	{
+		return count;
+	}
+
 	void Insert(Key key, Value value)
 	{
 		bool bShouldFree;
@@ -84,6 +93,7 @@ public:
 
 		// TODO: First check if it's already there!
 		buckets[index].push_back(DMapPair<Value>(strVal, value));
+		count++;
 
 		if (bShouldFree)
 		{
@@ -102,7 +112,7 @@ public:
 		std::vector<DMapPair<Value>>& bucket = buckets[index];
 
 		// Search the buckets
-		for(int i=0; i < bucket.size(); i++)
+		for(unsigned int i=0; i < bucket.size(); i++)
 		{
 			// compare the keys
 			if (strcmp(strVal, bucket[i].Key)==0)

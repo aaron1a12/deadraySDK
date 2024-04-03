@@ -7,18 +7,12 @@
 
 using namespace Deadray;
 
+REGISTER_NODE_TYPE(Types::StaticMesh, StaticMesh);
+
 StaticMesh::StaticMesh(Node* parent) : SceneNode(parent)
 {
 	GetEngine()->log("Static mesh");
 
 	mesh = CreateChildNode<MeshNode>();
-	//mesh->SetMesh(L"data\\warlock.obj");
-}
-
-// Node type registration
-
-const bool StaticMesh::bRegistered = Engine::RegisterNewType(1003, "StaticMesh");
-NodeType StaticMesh::GetNodeType()
-{
-	return 1003;
+	mesh->SetMesh(L"data\\warlock.obj");
 }
