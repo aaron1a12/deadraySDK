@@ -49,11 +49,11 @@ LRESULT CALLBACK WindowMgr::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 			PostQuitMessage(0);
 		}
 		break;
-	case WM_PAINT:
+	/*case WM_PAINT:
 		//hdc = BeginPaint(hWnd, &ps);
 		// TODO: Add any drawing code here...
 		//EndPaint(hWnd, &ps);
-		break;
+		break;*/
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;

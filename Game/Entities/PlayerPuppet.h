@@ -1,5 +1,9 @@
+#pragma once
+
 #include "Deadray.h"
 #include "Deadray/SceneNode.h"
+
+#define PLAYER_PUPPET_CLASS 626299013
 
 // Forward declarations
 namespace Deadray {
@@ -16,10 +20,12 @@ private:
 	float rot;
 
 public:
-	PlayerPuppet(Node* parent);
+	PlayerPuppet();
 	~PlayerPuppet();
 
 	virtual void OnTick(float dt) override;
 
-	virtual uint32 GetNodeType() override {return 100;}
+	virtual uint32 GetNodeType() override {return PLAYER_PUPPET_CLASS;}
 };
+
+REGISTER_NODE_TYPE(PLAYER_PUPPET_CLASS, PlayerPuppet);

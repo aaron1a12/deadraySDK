@@ -1,3 +1,21 @@
+/*////////////////////////////////////////////////////////////////
+
+Engine.h
+
+The one and only: Engine. The lifecycle timeline is like so:
+
+CreateNew() --> Starts Engine Thread
+				--> Creates Thread Singleton
+				--> Instatiates `Engine`
+				--> Starts Game manager
+			--> Engine pointer is returned.
+				--> Starts render/tick loop
+
+
+
+
+////////////////////////////////////////////////////////////////*/
+
 #ifndef   DEADRAY_ENGINE_H
 #define   DEADRAY_ENGINE_H
 
@@ -7,31 +25,23 @@
 #include <deque>
 #include <string>
 
-//#include <boost/unordered_map.hpp>
-
 namespace Deadray {
 
+	class DebugText;
 	class Scene;
+	class GameManager;
 	struct DebugLine;
 
 	class DEADRAY_API Engine {
 
 	private:
 
-		// Mapping of Node type IDs to their names
-		//static DMap<uint32, const char*> nodeNames;
-		//static int foo;
-
-		//boost::unordered::unordered_map<std::string, uint32> fcharacoo;
-
-
 		RenderSettings currentRenderSettings;
 		RenderSettings pendingRenderSettings; // for thead safe updates
 		bool bUpdateSettings;
 
 		bool bMultithread;
-		DWORD mainThreadId;
-		int threadId;
+		DWORD engineThreadId;
 
 		bool bIsEditor;
 
@@ -44,9 +54,6 @@ namespace Deadray {
 		float fps;
 		float fpsMs;
 		float timeSinceFpsUpdate;
-
-		// Tick function for a high resolution timer. (calls Render())
-		static void CALLBACK RenderTick(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
 		// The main rendering view
 		HWND hMainWindow;
@@ -89,18 +96,45 @@ namespace Deadray {
 		uint32 height;
 
 		Grid* grid;
+		DebugText* debugText;
 
 		std::deque<Scene*> scenes;
 		Scene* activeScene;
 
-		ID3DXFont* g_pFont;
+		uint32 gameMgrTypeId;
+		GameManager* gameMgr;
+
+		HANDLE mutex;
 
 	public:
-		Engine(HWND window, RenderSettings& settings, void (*logFunc)(const char * format, ...), bool bEditor = false);
+		Engine(HWND window, RenderSettings& settings, uint32 gameMgrClass);
 		~Engine();
+
+		static Engine* CreateNew(const uint32 gameMgrClass, const HWND window, const RenderSettings& settings);
+		static Engine* Get();
+
+		inline bool IsEngineThread() { return (GetCurrentThreadId()==engineThreadId);}
+
+		inline HANDLE CreateMutex() {mutex = ::CreateMutex(NULL, false, NULL); return mutex;}
+		inline HANDLE GetMutex() {return mutex;}
+
+
+		void StartGameManager();
+
+		GameManager* GetGameManager() { return gameMgr; }
+
+
+		template <class T>
+		T* CreateGame ()
+		{
+			T* ptr = new T( this );
+			return ptr;
+		}
 
 		// Frees all related resources.
 		void Shutdown();
+		bool bRequestShutdown;
+		bool bCanSafelyExit;
 
 		void SetAsMultithreaded(int deadrayThreadId);
 
@@ -122,6 +156,7 @@ namespace Deadray {
 		void TickLoop();
 
 		void EnableGrid(bool bEnable = true);
+		void EnableDebugText(bool bEnable = true);
 
 		void DebugDrawLine(Vector3 start, Vector3 end, DWORD color, float duration);
 		void DebugDrawCube(Vector3 center, float size, DWORD color, float duration);

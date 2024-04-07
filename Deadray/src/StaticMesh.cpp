@@ -9,9 +9,9 @@ using namespace Deadray;
 
 REGISTER_NODE_TYPE(Types::StaticMesh, StaticMesh);
 
-StaticMesh::StaticMesh(Node* parent) : SceneNode(parent)
+StaticMesh::StaticMesh()
 {
-	GetEngine()->log("Static mesh");
+	Engine::Get()->log("Static mesh");
 
 	mesh = CreateChildNode<MeshNode>();
 	mesh->SetMesh(L"data\\warlock.obj");

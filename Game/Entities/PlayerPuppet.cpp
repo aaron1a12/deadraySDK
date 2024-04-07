@@ -1,12 +1,13 @@
 #include "stdafx.h"
+#include "../Game.h"
 #include "PlayerPuppet.h"
 #include "Deadray/MeshNode.h"
 
 using namespace Deadray;
 
-PlayerPuppet::PlayerPuppet(Node* parent) : SceneNode(parent)
+PlayerPuppet::PlayerPuppet()
 {
-	GetEngine()->log("Player spawned.");
+	Engine::Get()->log("Player spawned.");
 
 	bIsTickable = true;
 
@@ -17,11 +18,16 @@ PlayerPuppet::PlayerPuppet(Node* parent) : SceneNode(parent)
 	mesh->SetRotation(Vector3(0.f, 0.f, 0.f));
 
 	rot = 0;
+
+	ThreadSingleton::Get()->GetEngine();
+
+	// Listen to input
+	// Engine::Get()->EvtInput.AddListener(this);
 }
 
 PlayerPuppet::~PlayerPuppet()
 {
-	GetEngine()->log("Player killed.");
+	Engine::Get()->log("Player killed.");
 }
 
 void PlayerPuppet::OnTick(float dt)
@@ -29,5 +35,3 @@ void PlayerPuppet::OnTick(float dt)
 	rot += 90.f * dt;
 	mesh->SetRotation(Vector3(0.f, rot, 0.f));
 }
-
-REGISTER_NODE_TYPE(100, PlayerPuppet);

@@ -7,11 +7,11 @@ namespace Deadray {
 
 	class DEADRAY_API Node;
 
-	typedef void* (*NodeCreator)(Node*);
+	typedef void* (*NodeCreator)();
 
 	// Registers engine-wide node type (makes it spawnable when loading levels and allows class name lookup)
 	#define REGISTER_NODE_TYPE(CLASSID, CLASSNAME) \
-	static bool CLASSNAME##Registered = TypeManager.RegisterNewType(NodeClassInfo(CLASSID, #CLASSNAME, (NodeCreator)&CLASSNAME::CreateObject<CLASSNAME>));
+	static bool CLASSNAME##Registered = Deadray::TypeManager.RegisterNewType(Deadray::NodeClassInfo(CLASSID, #CLASSNAME, (Deadray::NodeCreator)&CLASSNAME::CreateObject<CLASSNAME>));
 
 	struct NodeClassInfo {
 		uint32 Id;
@@ -49,7 +49,7 @@ namespace Deadray {
 
 		static const bool RegisterNewType(NodeClassInfo nodeClass);
 		static const char* GetNodeTypeName(uint32 type);
-		static Node* CreateNewObjectByType(uint32 type, Node* parent);
+		static Node* CreateNewObjectByType(uint32 type);
 	};
 
 	// Singleton

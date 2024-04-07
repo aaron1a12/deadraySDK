@@ -13,7 +13,7 @@ using namespace Deadray;
 
 REGISTER_NODE_TYPE(Types::MeshNode, MeshNode);
 
-MeshNode::MeshNode(Node* parent) : SceneNode(parent)
+MeshNode::MeshNode()
 {
 	bIsTickable = true;
 
@@ -36,7 +36,7 @@ MeshNode::MeshNode(Node* parent) : SceneNode(parent)
 	d3d9Data->g_pIB = NULL;
 	d3d9Data->g_pTexture = NULL;
 
-	GetScene()->RegisterMeshNode(this);
+	Engine::Get()->GetScene()->RegisterMeshNode(this);
 }
 
 MeshNode::~MeshNode()
@@ -46,10 +46,12 @@ MeshNode::~MeshNode()
 
 void MeshNode::OnDeviceStart()
 {
-	LPDIRECT3DDEVICE9 d3d = GetEngine()->GetD3dDevice();
+	LPDIRECT3DDEVICE9 d3d = Engine::Get()->GetD3dDevice();
 	
 	//D3DPOOL_MANAGED?
-	d3d->CreateVertexBuffer( GetVertexCount() * sizeof(PrimitiveVertex), 0, D3DFVF_PRIMVERTEX, D3DPOOL_DEFAULT, &d3d9Data->g_pVB, NULL);
+	HRESULT hr = d3d->CreateVertexBuffer( GetVertexCount() * sizeof(PrimitiveVertex), 0, D3DFVF_PRIMVERTEX, D3DPOOL_DEFAULT, &d3d9Data->g_pVB, NULL);
+	
+
 	d3d->CreateIndexBuffer(GetIndexCount() * sizeof(WORD), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &d3d9Data->g_pIB, NULL);
 
 	VOID* pVertices;
@@ -80,14 +82,15 @@ void MeshNode::SetMesh(LPCWSTR pSrcFile)
 	bool bResult = OBJReader::ReadFromFile(pSrcFile, &meshData);
 
 	if (!bResult)
-		GetEngine()->log("Failed to load external mesh! (%ws)", pSrcFile);
+		Engine::Get()->log("Failed to load external mesh! (%ws)", pSrcFile);
 
 	if (d3d9Data->g_pVB != NULL)
 	{
 		// Reset device resources
 		OnDeviceShutdown();
-		OnDeviceStart();
 	}
+
+	OnDeviceStart();
 	
 }
 
@@ -129,8 +132,9 @@ void MeshNode::SetTextureFromFile(LPCWSTR pSrcFile)
 	if (d3d9Data->g_pTexture)
 	{
 		d3d9Data->g_pTexture->Release();
-		ReloadDeviceTexture();
 	}	
+
+	ReloadDeviceTexture();
 }
 
 void MeshNode::ReloadDeviceTexture()
@@ -150,14 +154,14 @@ void MeshNode::ReloadDeviceTexture()
 		};
 
 
-        D3DXCreateTextureFromFileInMemory(GetEngine()->GetD3dDevice(), &errTex, 0x66, &d3d9Data->g_pTexture);
+        D3DXCreateTextureFromFileInMemory(Engine::Get()->GetD3dDevice(), &errTex, 0x66, &d3d9Data->g_pTexture);
 		bHasDiffuse = true;
 
 		return;
 	}
 	
 	HRESULT hr = D3DXCreateTextureFromFileExW(
-		GetEngine()->GetD3dDevice(),
+		Engine::Get()->GetD3dDevice(),
 		diffusePath,
 		info.Width,
 		info.Height,

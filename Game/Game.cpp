@@ -1,23 +1,27 @@
 #include "stdafx.h"
+#include "Entities/PlayerPuppet.h"
 #include "Game.h"
 
-Game::Game(Engine* engine) : Node(engine) 
+using namespace Deadray;
+
+Game::Game()
 {
-	Scene* myScene = new Scene(engine);
-	engine->SwitchScene( myScene );
-
-	// Alternatively, you may 
-	player = (PlayerPuppet*)myScene->CreateNodeByType(100);
-	//player = myScene->CreateChildNode<PlayerPuppet>();
-
-	player->SetPosition(Vector3(0,0,0));
-
+	Engine* eng = Engine::Get();
+	eng->log("\nGame Manager initializing...!\n");
 	
+	Scene* myScene = new Scene();
+	eng->SwitchScene( myScene );
+
+	// Alternatively, you may create it dynamically
+	// player = (PlayerPuppet*)myScene->CreateNodeByType(100);
+	player = myScene->CreateChildNode<PlayerPuppet>();
+
+	//player->SetPosition(Vector3(0,0,0));	
 }
 
 Game::~Game()
 {
-	GetEngine()->log("Shutting down game...");
+	Deadray::Engine::Get()->log("Shutting down game...");
 
 	delete player;
 }

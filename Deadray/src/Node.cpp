@@ -37,33 +37,34 @@ Node::Node(Node* parent, void* extra)
 	//GetEngine()->log("A sub node was created.");
 }
 
-Node::~Node(void)
+Node::Node()
 {
-	GetEngine()->log("Node gone");
-}
- 
-Engine* Node::GetEngine()
-{
-	return (pParentNode != nullptr) ? pParentNode->GetEngine() : pEngine;
+	pEngine = nullptr;
+	pParentNode = nullptr;
+	bIsTickable = false;
 }
 
-Scene* Node::GetScene()
+Node::~Node(void)
 {
-	// Root nodes are assumed to be always a scene node.
-	return (pParentNode == nullptr) ? (Scene*)this : pParentNode->GetScene();
+	Engine::Get()->log("Node gone");
 }
 
 void Node::AttachNode(Node* childNode)
 {
 	childNodes.push_back(childNode);
+	childNode->OnAttach(this);
+}
+
+void Node::OnAttach(Node* parent)
+{
 }
 
 void Node::RegisterSceneNode(Node* node)
 {
-	GetEngine()->log("Register scene node");
+	Engine::Get()->log("Register scene node");
 
 	if (node->bIsTickable)
-		GetScene()->RegisterAsTickable(node);
+		Engine::Get()->GetScene()->RegisterAsTickable(node);
 }
 
 void Node::OnDeviceStart()
@@ -86,6 +87,14 @@ void Node::OnEvent(const Event& evt)
     // {
     //     const GameStartEvent& gameStart = static_cast<const GameStartEvent&>(evt);
     // }
+}
+
+void Node::OnGameStart()
+{
+}
+
+void Node::OnGameEnd()
+{
 }
 
 void Node::OnTick(float dt)

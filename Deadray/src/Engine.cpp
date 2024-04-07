@@ -1,27 +1,139 @@
 #include "stdafx.h"
 #include "Deadray/Core.h"
 #include "Deadray/Engine.h"
+#include "Deadray/DebugText.h"
 #include "Deadray/Scene.h"
 #include "Deadray/MeshNode.h"
+#include "Deadray/GameManager.h"
 #include "Deadray/DebugDraw.h"
 
 #include "Deadray/d3d9/D3d9Data.h"
 #include <math.h> 
 #include <limits>	
-
+#include <cassert>
 #include <string>	
 //#include <boost/unordered_map.hpp>
 
-float roundf(float x)
+using namespace Deadray;
+
+struct EngineThreadParams {
+	Engine** pEngine;
+	HWND hWindow;
+	RenderSettings settings;
+	uint32 gameMgrClass;
+	bool bReady;
+
+	EngineThreadParams() {
+		pEngine = nullptr;
+		hWindow = nullptr;
+		bReady = false;
+	}
+};
+
+DWORD EngineThread(EngineThreadParams& params)
 {
-   return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+	// Create the thread singleton
+	ThreadSingleton* ts = new ThreadSingleton(GetCurrentThreadId());
+
+	// Create the engine
+	Engine* engine = ts->CreateEngine(params.hWindow, params.settings, params.gameMgrClass);
+	engine->EnableGrid(true);
+	engine->EnableDebugText(true);
+
+	// Area of research: A mutex for safe IO with engine thread
+	engine->CreateMutex();
+	ReleaseMutex(engine->GetMutex());
+
+ 	// Start the game manager
+	engine->StartGameManager();
+
+	// Update the engine pointer on the main thread
+	*params.pEngine = engine;
+
+	//
+	// Start Game
+	//
+
+	engine->GetGameManager()->OnGameStart();
+
+	if (engine->GetScene())
+		engine->GetScene()->OnGameStart();
+
+	//
+	
+	// Signal the main thread. This really should be an atom
+	params.bReady = true;
+
+	while( engine->bRequestShutdown == false )
+	{
+		// TODO: Is it sensible to do this every frame?
+		// The reasoning is that the main thread can only signal (edit variables)
+		// on the engine between the frames/ticks.
+		WaitForSingleObject(engine->GetMutex(), INFINITE);
+		
+		engine->Render();
+		engine->Tick();
+
+		// This allows the main thread control over the mutex, which is
+		// a signal that we are allowed to write to the engine object safely.
+		ReleaseMutex(engine->GetMutex());
+	}
+
+	// Shutdown
+	engine->Shutdown();
+
+	delete ts;
+	return 0;
 }
 
-using namespace Deadray;
+Engine* Engine::CreateNew(const uint32 gameMgrClass, const HWND window, const RenderSettings& settings)
+{
+	Engine* newInstance = nullptr;
+ 
+	EngineThreadParams params;
+	params.hWindow = window;
+	params.pEngine = &newInstance;
+	params.gameMgrClass = gameMgrClass;
+	params.settings = settings;
+	params.bReady = false;
+
+	DWORD threadId;
+	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)EngineThread, &params, 0, &threadId);
+
+	while (!params.bReady) {
+		Sleep(0); // Weirdly enough, this improves performance.
+	}
+
+	return newInstance;
+}
+
+Engine* Engine::Get()
+{
+	ThreadSingleton* ts = ThreadSingleton::Get();
+	
+	return ThreadSingleton::Get()->GetEngine();
+}
 
 Engine::~Engine()
 {
-	this->Shutdown();
+	if(IsEngineThread())
+	{
+		this->Shutdown();
+	}
+	else
+	{
+		// Wait until the render/tick has finished
+		WaitForSingleObject(mutex, INFINITE);
+
+		bRequestShutdown = true;
+
+		// Release the mutex back to the engine thread
+		ReleaseMutex(mutex);
+
+		while(!bCanSafelyExit) { 
+			Sleep(0);
+		}
+	}
 }
 
 void Engine::Shutdown()
@@ -30,13 +142,26 @@ void Engine::Shutdown()
 
 	if (g_pd3dDevice != NULL) g_pd3dDevice->Release();
 	if (g_pD3D != NULL) g_pD3D->Release();
-	if (g_pFont!=NULL) g_pFont->Release();
+	//if (g_pFont!=NULL) g_pFont->Release();
+
+	if (grid)
+		grid->Destroy();
+
+	if (debugText)
+		debugText->Destroy();
 
 	delete view;
 	delete proj;
 	delete camViewOld;
 	delete camProjOld;
 	delete camLookAt;
+
+
+	// Get a handle to the mutex and close it.
+	WaitForSingleObject(mutex, INFINITE);
+	CloseHandle(mutex);
+
+	bCanSafelyExit = true;
 }
 
 void Engine::HandleError(HRESULT error)
@@ -55,16 +180,37 @@ void Engine::HandleError(HRESULT error)
 
 }
 
-Engine::Engine(HWND window, RenderSettings& settings, void (*logFunc)(const char * format, ...), bool bEditor)
+void debugPrintf(const char * _Format, ...)
 {
+	char buffer[256];
+	va_list args;
+	va_start (args, _Format);
+	buffer[0] = '\n';
+	vsnprintf_s(buffer+1, 254, 254, _Format, args);
+	va_end (args);
+
+	OutputDebugStringA(buffer);
+}
+
+Engine::Engine(HWND window, RenderSettings& settings, uint32 gameMgrClass)
+{
+	engineThreadId = GetCurrentThreadId();
+	ThreadSingleton* ts = ThreadSingleton::Get();
+
+	// Engine must instantiated on the engine thread
+	assert(ts);
+	assert(ts->GetThreadOwner() == engineThreadId);
+
 	OutputDebugStringA("\nDeadray starting up...\n");
 
-	mainThreadId = GetCurrentThreadId();
+	
 	DEBUG("sizeof vector: %d", sizeof(Vector3));
 
-	bIsEditor = bEditor;
+	bIsEditor = false;
 
 	// Initialiazers
+	bRequestShutdown = false;
+	bCanSafelyExit = false;
 	previousTime = (float)timeGetTime();
 	lastDt = 0.0f;
 	timeSinceFpsUpdate = 0.0f;
@@ -78,18 +224,7 @@ Engine::Engine(HWND window, RenderSettings& settings, void (*logFunc)(const char
 	camLookAt = new D3DXVECTOR3();
 
 	hMainWindow = window;
-	log = logFunc;
-
-
-	/*boost::unordered::unordered_map<std::string,int> umap;
-	umap["foo"] = 16;
-
-
-	foo["bar"] = 64;
-	log("Foo: %i", umap["foo"]);
-	log("Bar: %u", foo["bar"]);*/
-
-	
+	log = debugPrintf;	
 
 	camPos = Vector3(8.f, 4.f, 0.f);
 	camRot = Vector3(0.f, 0.f, 0.f);
@@ -115,10 +250,10 @@ Engine::Engine(HWND window, RenderSettings& settings, void (*logFunc)(const char
 
 
 	grid = NULL;
+	debugText = NULL;
 	g_pD3D = NULL;
 	g_pd3dDevice = NULL;
 	
-	g_pFont = NULL;
 
 	bDeviceObjsStarted = false;
 	
@@ -185,6 +320,24 @@ Engine::Engine(HWND window, RenderSettings& settings, void (*logFunc)(const char
 	viewport.MaxZ = 1;
 
 	g_pd3dDevice->SetViewport(&viewport);
+
+	// Create/load all buffers to GPU
+	//StartDeviceObjects();
+
+	//
+	// Game Manager
+	// This is the class that manages the entire game life cycle
+	// We can't create it yet since we're still instatiating the engine and
+	// all calls to Engine::Get() are invalid at this point.
+	//
+	
+	gameMgr = nullptr;
+	gameMgrTypeId = gameMgrClass;
+}
+
+void Engine::StartGameManager() 
+{
+	gameMgr = (GameManager*)TypeManager.CreateNewObjectByType(gameMgrTypeId);
 }
 
 void Engine::SetDefaultRenderStates()
@@ -314,10 +467,6 @@ void Engine::Render()
         return;
 	}
 
-
-    // Clear the backbuffer to a blue color
-
-	
     g_pd3dDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, currentRenderSettings.BgColor, 1.0f, 0 );
 	//D3DCOLOR_XRGB( 160, 160, 160 )
 	//g_pd3dDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0, 128, 128 ), 1.0f, 0 );
@@ -329,58 +478,7 @@ void Engine::Render()
         // Rendering of scene objects can happen here
 
 		if (grid) grid->Render();
-
-
-
-		// Font
-
-        UINT nHeight = currentRenderSettings.Height;
-
-		RECT rc;
-
-        // Pass in DT_NOCLIP so we don't have to calc the bottom/right of the rect
-        SetRect( &rc, 11, 11, 0, 0 );
-
-
-		// TODO: implement average FPS.
-		timeSinceFpsUpdate += lastDt;
-		if (timeSinceFpsUpdate > 0.05f)
-		{
-			timeSinceFpsUpdate = 0.0f;
-			fps = 1/lastDt;
-			fps *= 100.0f;
-			fps = roundf(fps);
-			fps /= 100.0f;
-			fpsMs = lastDt * 1000;
-		}
-
-
-		const char fmt[] = "Deadray Engine\nfps: %.2f\nms:  %.2f";
-		char buf[255];
-		_snprintf(buf, 255, fmt, fps, fpsMs);
-
-        g_pFont->DrawTextA( NULL, buf, -1, &rc, DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 0.0f, 1.0f ) );
-
-		SetRect( &rc, 10, 10, 0, 0 );
-
-		g_pFont->DrawTextA( NULL, buf, -1, &rc, DT_NOCLIP, D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f ));
-
-
-		//g_pd3dDevice->SetTexture( 0, g_pTexture );
-
-
-        // Draw the triangles in the vertex buffer. This is broken into a few
-        // steps. We are passing the Vertices down a "stream", so first we need
-        // to specify the source of that stream, which is our vertex buffer. Then
-        // we need to let D3D know what vertex shader to use. Full, custom vertex
-        // shaders are an advanced topic, but in most cases the vertex shader is
-        // just the FVF, so that D3D knows what type of Vertices we are dealing
-        // with. Finally, we call DrawPrimitive() which does the actual rendering
-        // of our geometry (in this case, just one triangle).
-        //g_pd3dDevice->SetStreamSource( 0, g_pVB, 0, sizeof( CUSTOMVERTEX ) );
-		//g_pd3dDevice->SetIndices(g_pIB);
-        //g_pd3dDevice->SetFVF( D3DFVF_CUSTOMVERTEX );
-        //g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, 6, 0, 2);
+		if (debugText) debugText->Render();
 
 		// Render the primitives in the current scene
 
@@ -481,12 +579,7 @@ void Engine::Render()
 		g_pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, false); 
 
 		g_pd3dDevice->SetTransform( D3DTS_WORLD, &matWorldIdentity );
-		g_pd3dDevice->SetTexture(0, NULL);
-
-		
-
-		DrawTextString(10,0,D3DCOLOR_XRGB( 0, 255, 0 ),"Hello DX World!");
-		
+		g_pd3dDevice->SetTexture(0, NULL);	
 
         // End the scene
         g_pd3dDevice->EndScene();
@@ -521,32 +614,9 @@ void Engine::StartDeviceObjects()
 		grid->OnDeviceStart();
 	}
 
-	int g_nFontSize = 12;
-
-	HDC hDC = GetDC( NULL );
-    int nLogPixelsY = GetDeviceCaps( hDC, LOGPIXELSY );
-    ReleaseDC( NULL, hDC );
-
-    int nHeight = -g_nFontSize * nLogPixelsY / 72;
-
-	
-
-	HRESULT hr = D3DXCreateFont( g_pd3dDevice,            // D3D device
-                         nHeight,               // Height
-                         0,                     // Width
-                         FW_BOLD,               // Weight
-                         1,                     // MipLevels, 0 = autogen mipmaps
-                         FALSE,                 // Italic
-                         DEFAULT_CHARSET,       // CharSet
-                         OUT_DEFAULT_PRECIS,    // OutputPrecision
-                         NONANTIALIASED_QUALITY,       // Quality
-                         DEFAULT_PITCH | FF_DONTCARE, // PitchAndFamily
-                         L"Lucida Console",              // pFaceName
-                         &g_pFont );              // ppFont
-
-	if (!FAILED(hr))
+	if (debugText)
 	{
-		log("created font!");
+		debugText->OnDeviceStart();
 	}
 
 	for (uint32 i = 0; i < scenes.size(); i++)
@@ -559,21 +629,17 @@ void Engine::StartDeviceObjects()
 
 void Engine::FreeDeviceObjects()
 {
-	if (bDeviceObjsStarted==false)
-		return;
+	//if (bDeviceObjsStarted==false)
+	//	return;
 
 	if (grid)
 	{
-		log("FreeDeviceObjects() | grid");
 		grid->OnDeviceShutdown();
 	}
 
-	if (g_pFont)
+	if (debugText)
 	{
-		
-		g_pFont->OnResetDevice();
-		g_pFont->Release();
-		g_pFont = NULL;
+		debugText->OnDeviceShutdown();
 	}
 
 	for (int i = 0; i < debugLines.size(); i++)
@@ -623,8 +689,28 @@ void Engine::SetRenderSettings(RenderSettings& newRenderSettings)
 
 void Engine::SetRenderSettingsThreadSafe(RenderSettings& newRenderSettings)
 {
+	// Wait until the render/tick has finished
+	WaitForSingleObject(mutex, INFINITE);
+
 	pendingRenderSettings = newRenderSettings;
 	bUpdateSettings = true;
+	
+	// Release the mutex back to the engine thread
+	ReleaseMutex(mutex);
+
+	// Synchronous wait
+
+	do
+	{
+		WaitForSingleObject(mutex, INFINITE);
+
+		if (bUpdateSettings==false)
+			break;
+
+		ReleaseMutex(mutex);
+		Sleep(0);
+	}
+	while(true);
 }
 
 
@@ -633,6 +719,7 @@ void Engine::EnableGrid(bool bEnable)
 	if (bEnable && grid == NULL)
 	{
 		grid = new Grid(this);
+		grid->OnDeviceStart();
 	}
 	else if (!bEnable && grid != NULL)
 	{
@@ -643,6 +730,21 @@ void Engine::EnableGrid(bool bEnable)
 	}
 }
 
+void Engine::EnableDebugText(bool bEnable)
+{
+	if (bEnable && debugText == NULL)
+	{
+		debugText = new DebugText();
+		debugText->OnDeviceStart();
+	}
+	else if (!bEnable && debugText != NULL)
+	{
+		debugText->Destroy();
+		free(debugText);
+
+		debugText = NULL;
+	}
+}
 
 LPDIRECT3DDEVICE9 Engine::GetD3dDevice()
 {
@@ -909,53 +1011,6 @@ void Engine::EndCameraOrbit()
 	camRot = camTmpRot;
 }
 
-
-
-void Engine::DrawTextString( int x, int y, DWORD color, const char *str )
-{
-
-	/*HRESULT r=0;
-
-
-	// Get a handle for the font to use
-
-	HFONT hFont = (HFONT)GetStockObject( SYSTEM_FONT );
-	LPD3DXFONT pFont = 0;
-
-	// Create the D3DX Font
-
-//	DXUTFontNode* pFontNode = m_FontCache.GetAt( iFont );
-
-	//r = D3DXCreateFont( g_pd3dDevice, 32, 32, 400, 4, true,  hFont, &pFont );
-	r = D3DXCreateFont( g_pd3dDevice, 32, 0, 400, 1, FALSE, DEFAULT_CHARSET,
-                              OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-                              L"Arial", &pFont );
-
-	if( FAILED(r))
-	//Do Debugging
-
-	// Rectangle where the text will be located
-	RECT TextRect = {x,y,0,0};
-
-	// Inform font it is about to be used
-	pFont->Begin();
-
-	// Calculate the rectangle the text will occupy
-	pFont->DrawText( str, -1, &TextRect, DT_CALCRECT, 0 );
-
-	// Output the text, left aligned
-	pFont->DrawText( str, -1, &TextRect, DT_LEFT, color );
-
-	// Finish up drawing
-	pFont->End();
-
-
-	// Release the font
-	pFont->Release();*/
-
-}
-
-
 Scene* Engine::GetScene()
 {
 	return activeScene;
@@ -965,34 +1020,6 @@ void Engine::SwitchScene(Scene* newScene)
 {
 	activeScene = newScene;
 }
-
-
-void CALLBACK Engine::RenderTick(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2)
-{
-	Engine* engineInst = (Engine*)dwUser;
-
-	engineInst->Render();
-}
-
-
-void Engine::RenderLoop()
-{
-	
-	DWORD renderInterval = 1000 / currentRenderSettings.TargetFPS;
-
-	// High resolution timer
-
-	TIMECAPS tc;
-	timeGetDevCaps(&tc, sizeof(TIMECAPS));
-	uint m_uResolution = min(max(tc.wPeriodMin, 0), tc.wPeriodMax);
-
-	timeBeginPeriod(renderInterval);
-	timeSetEvent(renderInterval, m_uResolution, RenderTick, (DWORD)this, TIME_PERIODIC);
-
-	//timeEndPeriod(renderInterval); should be called after changing loop or ending.
-}
-
-
 
 void Engine::Tick()
 {
@@ -1025,5 +1052,5 @@ float Engine::GetDeltaTime()
 void Engine::SetAsMultithreaded(int deadrayThreadId)
 {
 	bMultithread = true;
-	threadId = deadrayThreadId;
+	//engineThreadId = deadrayThreadId;
 }

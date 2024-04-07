@@ -16,9 +16,10 @@ namespace Deadray {
 			Primitive = 4,
 			MeshNode = 5,
 			StaticMesh = 6,
-			Camera = 7,
-			Light = 8,
-			Agent = 9
+			GameManager = 7,
+			Camera = 8,
+			Light = 9,
+			Agent = 10
 		};
 	}
 }

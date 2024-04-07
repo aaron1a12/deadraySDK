@@ -32,18 +32,18 @@ const char* TypeManagerClass::GetNodeTypeName(uint32 type)
 	}
 }
 
-Node* TypeManagerClass::CreateNewObjectByType(uint32 type, Node* parent)
+Node* TypeManagerClass::CreateNewObjectByType(uint32 type)
 {
 	NodeClassInfo* nodeInfo = GetRegistry().Find(type);
 
 	if (nodeInfo)
 	{
-		return (Node*)nodeInfo->Creator(parent);
+		return (Node*)nodeInfo->Creator();
 	}
 	else
 	{
 		MessageBox(NULL, L"Class not found", L"Error", MB_ICONERROR);
-		return new Node(parent);
+		return new Node();
 	}
 }
 

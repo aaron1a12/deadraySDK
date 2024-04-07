@@ -60,7 +60,7 @@ namespace Deadray {
 		D3d9Data* d3d9Data;
 
 	public:
-		MeshNode(Node* parent);
+		MeshNode();
 		~MeshNode();
 
 		virtual void OnDeviceStart() override;

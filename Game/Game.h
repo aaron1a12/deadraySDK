@@ -1,13 +1,22 @@
+#pragma once
+
 #include "Main.h"
 #include "Deadray.h"
-#include "Entities/PlayerPuppet.h"
+#include "Deadray/GameManager.h"
 
-using namespace Deadray;
+#define GAME_CLASS 100173325
 
-class Game : public Node {
+class PlayerPuppet;
+
+class Game : public Deadray::GameManager {
 public:
 	PlayerPuppet* player;
 
-	Game(Engine* engine);
+public:
+	Game();
 	~Game();
+
+	virtual uint32 GetNodeType() override {return GAME_CLASS;}
 };
+
+REGISTER_NODE_TYPE(GAME_CLASS, Game);

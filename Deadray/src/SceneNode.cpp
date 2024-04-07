@@ -7,9 +7,9 @@ using namespace Deadray;
 
 REGISTER_NODE_TYPE(Types::SceneNode, SceneNode);
 
-SceneNode::SceneNode(Node* parent) : Node(parent)
+SceneNode::SceneNode()
 {
-	GetEngine()->log("Scene node created");
+	Engine::Get()->log("Scene node created");
 
 	/*localPosition = Vector3(0.0, 0.0, 0.0);
 	localRotation = Vector3(0.0, 0.0, 0.0);
@@ -29,6 +29,7 @@ SceneNode::SceneNode(Node* parent) : Node(parent)
 
 SceneNode::~SceneNode(void)
 {
+	Engine::Get()->log("Bye bye scene node.");
 	delete worldMatrix;
 }
 

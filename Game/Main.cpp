@@ -7,6 +7,8 @@
 
 #include "Game.h"
 
+using namespace Deadray;
+
 Deadray::Engine* engine;
 
 void debugPrintf(const char * _Format, ...)
@@ -23,6 +25,10 @@ void debugPrintf(const char * _Format, ...)
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,  LPTSTR lpCmdLine, int nCmdShow)
 {
+	/*char* str = new char[16];
+	sprintf(str, "Main Thread ID: %u", GetCurrentThreadId());
+	MessageBoxA(NULL, str, "", MB_OK);*/
+
 	WindowMgr wndMgr;
 
 	RECT winRect;
@@ -34,12 +40,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,  LPTSTR lpC
 	settings.TargetFPS = 60;
 	settings.BgColor = 0;
 
-	Deadray::Engine* engine = new Deadray::Engine(wndMgr.GetWindowHandle(), settings, &debugPrintf, 0);
-	Game* game = new Game(engine);
+	Engine* engine = Deadray::Engine::CreateNew(GAME_CLASS, wndMgr.GetWindowHandle(), settings);
 
-	//engine->EnableGrid(true);
-
-	engine->SetRenderSettings(settings);
+	engine->log("Resolution: %i, %i", settings.Width, settings.Height);
 
 	MSG msg;
 
@@ -48,12 +51,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,  LPTSTR lpC
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-
-		engine->Render();
-		engine->Tick();
 	}
 
-	delete game;
 	delete engine;
 	return (int) msg.wParam;
 }

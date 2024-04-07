@@ -72,6 +72,7 @@ typedef struct IDirect3DTexture9 *LPDIRECT3DTEXTURE9, *PDIRECT3DTEXTURE9;
 #define WRITE_FILL(_WRITE_BUFF, _WRITE_NEEDLE, _WRITE_LENGTH, _WRITE_VALUE)  memset((void*)((PTR)_WRITE_BUFF+_WRITE_NEEDLE), _WRITE_VALUE, _WRITE_LENGTH); _WRITE_NEEDLE+= _WRITE_LENGTH;
 
 //#include "Deadray/DMap.hpp"
+#include "Deadray/ThreadSingleton.h" 
 #include "Deadray/Test.h"
 #include "Deadray/Types.h"
 #include "Deadray/TypeManager.h"

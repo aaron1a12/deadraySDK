@@ -9,7 +9,7 @@ namespace Deadray {
 
 	private:
 	public:
-		Camera(Node* parent, void* extra = nullptr);
+		Camera();
 		~Camera();
 
 		virtual void OnTick(float dt) override;		

@@ -19,7 +19,7 @@ namespace Deadray {
 		D3DXMATRIXA16* worldMatrix;
 
 	public:
-		SceneNode(Node* parent);
+		SceneNode();
 		~SceneNode();
 
 		virtual uint32 GetNodeType() override {
@@ -27,7 +27,6 @@ namespace Deadray {
 		}
 
 	public:
-
 		Vector3 GetRotation();
 		void SetPosition(Vector3 position);
 		void SetRotation(Vector3 rotation);
@@ -37,8 +36,6 @@ namespace Deadray {
 		void UpdateMatrix();
 		D3DXMATRIXA16 GetWorldMatrix();
 	};
-
-	//REGISTER_NODE_TYPE(Types::SceneNode, SceneNode);
 
 }
 

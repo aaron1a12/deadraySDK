@@ -24,12 +24,13 @@ namespace Deadray {
 		//typedef Node Super;
 		Node(Engine* engine, void* params = nullptr);
 		Node(Node* parent, void* params = nullptr);
+		Node();
 		~Node();
 
 		// Used for dynamic creation from the factory
 		template <typename T>
-		static void* CreateObject(Node* parent) {
-			return new T(parent);
+		static void* CreateObject() {
+			return new T();
 		}
 
 		// Must be overriden on every child class
@@ -40,11 +41,11 @@ namespace Deadray {
 
 		virtual void Destroy();
 
-		Engine* GetEngine();
-		Scene* GetScene();
-
 		// Attaches an existing node to this one
 		void AttachNode(Node* childNode);
+
+		// Event when being attached. Good time to update matrix?
+		virtual void OnAttach(Node* parent);
 
 		// Associates this node with the scene.
 		void RegisterSceneNode(Node* node);
@@ -54,7 +55,7 @@ namespace Deadray {
 		template <class T>
 		T* CreateChildNode ()  // ... = flexible constructor possible!?
 		{
-			T* ptr = new T( this );
+			T* ptr = new T();
 
 			AttachNode((Node*)ptr);
 			RegisterSceneNode((Node*)ptr);
@@ -65,23 +66,12 @@ namespace Deadray {
 		
 		bool bIsTickable;
 
-
-		// 
 		void AddEventListener(uint16 evtType, Node* listener);
 		virtual void OnEvent(const Event& evt);
 
-		//
-		//virtual bool ShouldRegisterAsTickable();
-
-		//void RegisterAsTickable();
-
-		//void Tick(float dt);
-
-		//void onEvent();
-
 	public:
-		//virtual void OnGameStart();
-
+		virtual void OnGameStart();
+		virtual void OnGameEnd();
 		virtual void OnTick(float dt);
 
 	};

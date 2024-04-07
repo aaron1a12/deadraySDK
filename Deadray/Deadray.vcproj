@@ -234,11 +234,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\DebugText.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\Engine.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\src\Event.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\GameManager.cpp"
 					>
 				</File>
 				<File
@@ -271,6 +279,10 @@
 				</File>
 				<File
 					RelativePath=".\src\Test.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\ThreadSingleton.cpp"
 					>
 				</File>
 				<File
@@ -316,6 +328,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\Deadray\DebugText.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Deadray\DMap.h"
 					>
 				</File>
@@ -329,6 +345,10 @@
 				</File>
 				<File
 					RelativePath=".\include\Deadray\FileSystem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Deadray\GameManager.h"
 					>
 				</File>
 				<File
@@ -365,6 +385,10 @@
 				</File>
 				<File
 					RelativePath=".\include\Deadray\Test.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Deadray\ThreadSingleton.h"
 					>
 				</File>
 				<File

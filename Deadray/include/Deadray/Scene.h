@@ -34,8 +34,8 @@ namespace Deadray {
 		Engine* inst;
 
 	public:
-		Scene(Engine* engine);
-		//~Scene();
+		Scene();
+		~Scene();
 
 		void OnDeviceStart();
 		void OnDeviceShutdown();
@@ -64,8 +64,10 @@ namespace Deadray {
 		uint32 RegisterAsTickable(Node* node);
 
 		// Creates a node, given its id. Alternative to template version: CreateChildNode<T>()
-		Node* CreateNodeByType(uint32 type, Node* parent = nullptr);
+		Node* CreateNodeByType(uint32 type);
 
+		void OnGameStart();
+		void OnGameEnd();
 		void Tick(float dt);
 	};
 

@@ -7,11 +7,9 @@
 
 using namespace Deadray;
 
-Scene::Scene(Engine* engine) : Node(engine)
+Scene::Scene()
 {
-	//Super::Scene();
-
-	inst = engine;
+	inst = Engine::Get();
 	inst->RegisterScene(this);
 	inst->log("Scene created.");
 
@@ -88,12 +86,9 @@ uint32 Scene::RegisterAsTickable(Node* node)
 	return id;
 }
 
-Node* Scene::CreateNodeByType(uint32 type, Node* parent)
+Node* Scene::CreateNodeByType(uint32 type)
 {
-	if (parent==nullptr)
-		parent = this;
-
-	Node* n = TypeManager.CreateNewObjectByType(type, parent);
+	Node* n = TypeManager.CreateNewObjectByType(type);
 
 	if (n->bIsTickable)
 		RegisterAsTickable(n);
@@ -101,6 +96,15 @@ Node* Scene::CreateNodeByType(uint32 type, Node* parent)
 	return n;
 }
 
+void Scene::OnGameStart()
+{
+	// TODO: Fire game start on all nodes
+}
+
+void Scene::OnGameEnd()
+{
+	// TODO: Fire game end on all nodes
+}
 
 void Scene::Tick(float dt)
 {

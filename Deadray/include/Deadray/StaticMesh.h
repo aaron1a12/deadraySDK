@@ -15,7 +15,7 @@ namespace Deadray {
 		MeshNode* mesh;
 
 	public:
-		StaticMesh(Node* parent);
+		StaticMesh();
 		~StaticMesh();
 
 		virtual uint32 GetNodeType() override {return Types::StaticMesh;}
